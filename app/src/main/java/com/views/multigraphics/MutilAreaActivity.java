@@ -60,7 +60,7 @@ public class MutilAreaActivity extends AppCompatActivity {
         paintingArea.add(new PointBean(90f, 330f, 4));
 
         MultiGraphicsView.GraphicsObj currentArea = new MultiGraphicsView.GraphicsObj();
-        currentArea.setAraa(paintingArea, true);
+        currentArea.setAraa(paintingArea, false);
 
         Log.i("MainActivity", "addSuijiPoint : " + new Gson().toJson(currentArea));
         graphicsView.addAreaBeans(currentArea);

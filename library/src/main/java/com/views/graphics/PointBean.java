@@ -10,6 +10,9 @@ public class PointBean {
     private int position;
     private boolean current;
 
+    public PointBean() {
+    }
+
     public PointBean(float x, float y, int position) {
         this.x = x;
         this.y = y;

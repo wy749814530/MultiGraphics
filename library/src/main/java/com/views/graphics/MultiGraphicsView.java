@@ -582,6 +582,7 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
         if (currentArea == null || currentArea.getAraa() == null || currentArea.getAraa().size() < 3) {
             return false;
         }
+
         PointBean pointBean = currentArea.getClickPoint();
         if (x <= (pointBean.getX() + delArea) && x >= (pointBean.getX() - delArea) && y <= (pointBean.getY() + delArea) && y >= (pointBean.getY() - delArea)) {
             return true;
@@ -833,7 +834,7 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
      *
      * @param graphicsObjs
      */
-    public void setPointBeans(List<GraphicsObj> graphicsObjs) {
+    public void setAreaBeans(List<GraphicsObj> graphicsObjs) {
         mAreas.clear();
         if (graphicsObjs != null && graphicsObjs.size() != 0) {
             mAreas.addAll(graphicsObjs);
@@ -853,6 +854,7 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
             return;
         }
         mAreas.add(graphicsObjs);
+        mDottedLine = true;
         checkIntersect();
         invalidate();
     }
@@ -888,6 +890,7 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
         currentArea = new GraphicsObj();
         currentArea.setAraa(paintingArea, true);
         mAreas.add(currentArea);
+        mDottedLine = true;
         invalidate();
         return true;
     }
@@ -923,11 +926,24 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
         }
 
         public PointBean getClickPoint() {
-            if (mAraa.size() > 1) {
-                float px = mAraa.get(1).getX();
-                float py = mAraa.get(1).getY();
-                clickPoint = new PointBean(px, py, 0);
+            float minY = -100;
+            int minPostion = 0;
+            for (int i = 0; i < mAraa.size(); i++) {
+                PointBean point = mAraa.get(i);
+                if (minY == -100) {
+                    minPostion = i;
+                    minY = point.getY();
+                } else {
+                    if (point.getY() <= minY) {
+                        minPostion = i;
+                        minY = point.getY();
+                    }
+                }
             }
+
+            float px = mAraa.get(minPostion).getX();
+            float py = mAraa.get(minPostion).getY();
+            clickPoint = new PointBean(px, py, 0);
             return clickPoint;
         }
 
