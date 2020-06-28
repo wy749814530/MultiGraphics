@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:apps="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -9,7 +10,13 @@
     <com.views.graphics.MultiGraphicsView
         android:id="@+id/graphicsView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        apps:multi_delImage="@mipmap/ic_launcher"
+        apps:multi_generalColor="@color/colorAccent"
+        apps:multi_max="6"
+        apps:multi_selectColor="@color/blue_color"
+        apps:multi_showPoint="true"
+        apps:multi_showTable="true" />
 
     <LinearLayout
         android:layout_width="wrap_content"

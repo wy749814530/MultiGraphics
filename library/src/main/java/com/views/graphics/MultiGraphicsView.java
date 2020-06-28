@@ -1,6 +1,7 @@
 package com.views.graphics;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -44,15 +45,16 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
     }
 
 
-    Paint mPaintText;     // 坐标点数字
-    int mPaintTextColor = 0xff13c6ed;
-    Paint mPaintPoint;    // 坐标点
-    Paint mPaintBg;       // 当前选中的点
-    int mPaintBgColor = 0xffffffff;
-    Paint mPaintCurrent; // 当前选中的点
+    Paint mSelectPaint;         // 选中区域内画笔
+    Paint mSelectLinePaint;    // 选中区域外边框画笔
+    int mSelectPaintColor = 0xff13c6ed;
+    int mGeneralPaintColor = 0xff13c6ed;
+
+
     Paint mPaintLine;    // 底层网格线
     int mPaintLineColor = 0xff999999;
-    Paint mCurrentPointPaint; // 底层网格线
+
+    Paint mCurrentPointPaint; //
     int mCurrentPointColor = 0xffB0E11E;
 
 
@@ -63,6 +65,10 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
     private int MAX_AREA_COUNT = 4;          // 最多显示多少个点
     private boolean mDottedLine = false;    // 是否显示虚线
     private boolean hadIntersect = false;   // 是否有交叉线
+    private int delImageResourceId = 0;
+    private boolean mShowPoint;
+    private boolean mShowTable;
+
     private OnDelClickListener Mlistener;
     //最大图形框
     ArrayList<PointBean> MaxArea = new ArrayList<>();
@@ -76,30 +82,54 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
 
     public MultiGraphicsView(Context context) {
         super(context);
-        initPoint(context);
+        initPoint(context, null);
     }
 
     public MultiGraphicsView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        initPoint(context);
+        initPoint(context, attrs);
     }
 
     public MultiGraphicsView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        initPoint(context);
+        initPoint(context, attrs);
     }
 
     public void setOnDelClickListener(OnDelClickListener listener) {
         this.Mlistener = listener;
     }
 
-    private void initPoint(Context context) {
-        mPaintText = new Paint();
-        mPaintText.setStrokeWidth(2);
-        mPaintText.setAntiAlias(true);
-        mPaintText.setTextSize(25);
-        mPaintText.setStyle(Paint.Style.FILL);
-        mPaintText.setColor(mPaintTextColor);
+    private void initPoint(Context context, AttributeSet attrs) {
+        if (attrs != null) {
+            TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.MultiGraphicsView);
+            mSelectPaintColor = typedArray.getColor(R.styleable.MultiGraphicsView_multi_selectColor, mSelectPaintColor);
+            mGeneralPaintColor = typedArray.getColor(R.styleable.MultiGraphicsView_multi_generalColor, mGeneralPaintColor);
+            delImageResourceId = typedArray.getResourceId(R.styleable.MultiGraphicsView_multi_delImage, delImageResourceId);
+            PRECISION = typedArray.getDimensionPixelSize(R.styleable.MultiGraphicsView_multi_miniSpacing, PRECISION);
+            mShowPoint = typedArray.getBoolean(R.styleable.MultiGraphicsView_multi_showPoint, false);
+            mShowTable = typedArray.getBoolean(R.styleable.MultiGraphicsView_multi_showTable, false);
+            MAX_AREA_COUNT = typedArray.getInteger(R.styleable.MultiGraphicsView_multi_max, 4);
+        }
+
+        mSelectPaint = new Paint();
+        mSelectPaint.setStrokeWidth(2);
+        mSelectPaint.setAntiAlias(true);
+        mSelectPaint.setStyle(Paint.Style.FILL);
+        mSelectPaint.setAlpha(50);
+        mSelectPaint.setColor(mGeneralPaintColor);
+        mSelectPaint.setStrokeWidth(2);//为画笔设置粗细
+        mSelectPaint.setStrokeJoin(Paint.Join.ROUND);
+        mSelectPaint.setStrokeCap(Paint.Cap.ROUND);
+
+
+        mSelectLinePaint = new Paint();
+        mSelectLinePaint.setStrokeWidth(2);
+        mSelectLinePaint.setAntiAlias(true);
+        mSelectLinePaint.setStyle(Paint.Style.STROKE);
+        mSelectLinePaint.setColor(mGeneralPaintColor);
+        mSelectLinePaint.setStrokeWidth(2);//为画笔设置粗细
+        mSelectLinePaint.setStrokeJoin(Paint.Join.ROUND);
+        mSelectLinePaint.setStrokeCap(Paint.Cap.ROUND);
 
         mPaintLine = new Paint();
         mPaintLine.setStrokeWidth(0.5f);
@@ -108,29 +138,6 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
         mPaintLine.setStyle(Paint.Style.FILL);
         mPaintLine.setColor(mPaintLineColor);
 
-        mPaintBg = new Paint();
-        mPaintBg.setStrokeWidth(4);
-        mPaintBg.setAntiAlias(true);
-        mPaintBg.setTextSize(25);
-        mPaintBg.setStyle(Paint.Style.FILL);
-        mPaintBg.setColor(mPaintBgColor);
-
-
-        mPaintPoint = new Paint();
-        mPaintPoint.setStrokeWidth(4);
-        mPaintPoint.setAntiAlias(true);
-        mPaintPoint.setTextSize(25);
-        mPaintPoint.setStyle(Paint.Style.STROKE);//设置空心
-        mPaintPoint.setColor(mPaintTextColor);
-
-        mPaintCurrent = new Paint();
-        mPaintCurrent.setStrokeWidth(4);
-        mPaintCurrent.setAntiAlias(true);
-        mPaintCurrent.setTextSize(25);
-        mPaintCurrent.setStyle(Paint.Style.FILL);//设置空心
-        mPaintCurrent.setColor(mPaintTextColor);
-        setOnTouchListener(this);
-
 
         mCurrentPointPaint = new Paint();
         mCurrentPointPaint.setStrokeWidth(2);
@@ -138,6 +145,9 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
         mCurrentPointPaint.setTextSize(25);
         mCurrentPointPaint.setStyle(Paint.Style.FILL);
         mCurrentPointPaint.setColor(mCurrentPointColor);
+
+
+        setOnTouchListener(this);
     }
 
     @Override
@@ -153,14 +163,27 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
         super.onDraw(canvas);
         canvas.setDrawFilter(new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG));
 
-        drawBgGridlines(canvas); // 画网格线
+        if (mShowTable) {
+            drawBgGridlines(canvas); // 画网格线
+        }
+
         for (GraphicsObj area : mAreas) {
+            Log.i(TAG, "== onDraw GraphicsObj:" + area.toString());
+            if (area.isSelect) {
+                mSelectPaint.setColor(mSelectPaintColor);
+                mSelectLinePaint.setColor(mSelectPaintColor);
+            } else {
+                mSelectPaint.setColor(mGeneralPaintColor);
+                mSelectLinePaint.setColor(mGeneralPaintColor);
+            }
             drawCloseGraphics(canvas, area.getAraa());// 画封闭图形填充区域
             drawCloseLines(canvas, area.getAraa());// 画封闭图形外线
             drawDelPoint(canvas, area.getAraa());// 画对应点的数字框
         }
         // 画当前点位置
-        drawCurrentPoint(canvas);
+        if (mShowPoint) {
+            drawCurrentPoint(canvas);
+        }
     }
 
     /**
@@ -187,24 +210,12 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
      * @param area
      */
     private void drawCloseGraphics(Canvas canvas, List<PointBean> area) {
-        Paint paint = new Paint();//创建画笔
-        paint.setAntiAlias(true);
         if (hadIntersect) {
-            paint.setColor(Color.RED);//为画笔设置颜色
-        } else {
-            paint.setColor(mPaintTextColor);//为画笔设置颜色
+            mSelectPaint.setColor(Color.RED);//为画笔设置颜色
         }
-        paint.setStrokeWidth(2);//为画笔设置粗细
-        paint.setAlpha(50);
-        //连接的外边缘以圆弧的方式相交
-        paint.setStrokeJoin(Paint.Join.ROUND);
-        //线条结束处绘制一个半圆
-        paint.setStrokeCap(Paint.Cap.ROUND);
-
+        mSelectPaint.setAlpha(50);
         PointBean fristPoint;
         Path path = new Path();
-
-
         for (int i = 0; i < area.size(); i++) {
             if (i == 0) {
                 fristPoint = area.get(0);
@@ -215,7 +226,7 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
         if (area.size() >= 3) {
             path.close();//闭合图形
         }
-        canvas.drawPath(path, paint);
+        canvas.drawPath(path, mSelectPaint);
     }
 
     /**
@@ -225,20 +236,9 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
      * @param area
      */
     private void drawCloseLines(Canvas canvas, List<PointBean> area) {
-        Paint paint = new Paint();//创建画笔
-        paint.setAntiAlias(true);
         if (hadIntersect) {
-            paint.setColor(Color.RED);//为画笔设置颜色
-        } else {
-            paint.setColor(mPaintTextColor);//为画笔设置颜色
+            mSelectLinePaint.setColor(Color.RED);//为画笔设置颜色
         }
-        paint.setStrokeWidth(4);//为画笔设置粗细
-        //paint.setAlpha(80);
-        paint.setStyle(Paint.Style.STROKE);//设置空心
-        //连接的外边缘以圆弧的方式相交
-        paint.setStrokeJoin(Paint.Join.ROUND);
-        //线条结束处绘制一个半圆
-        paint.setStrokeCap(Paint.Cap.ROUND);
 
         PointBean fristPoint;
         Path path = new Path();
@@ -253,14 +253,14 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
         }
 
         if (mDottedLine) {
-            paint.setPathEffect(effects);
+            mSelectLinePaint.setPathEffect(effects);
         }
 
         if (area.size() >= 3) {
             path.close();//闭合图形
         }
 
-        canvas.drawPath(path, paint);
+        canvas.drawPath(path, mSelectLinePaint);
     }
 
     /**
@@ -269,16 +269,35 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
      * @param canvas
      * @param area
      */
+    private int delArea = 30;
+
     private void drawDelPoint(Canvas canvas, List<PointBean> area) {
-        if (area.size() > 3) {
-            PointBean point = area.get(1);
+        float minY = -100;
+        int minPostion = 0;
+        for (int i = 0; i < area.size(); i++) {
+            PointBean point = area.get(i);
+            if (minY == -100) {
+                minPostion = i;
+                minY = point.getY();
+            } else {
+                if (point.getY() <= minY) {
+                    minPostion = i;
+                    minY = point.getY();
+                }
+            }
+
+        }
+        if (area.size() >= 3) {
+            PointBean point = area.get(minPostion);
             Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.del_icon);
-//            Matrix matrix = new Matrix();
-//            matrix.postScale(0.8f, 0.8f);
+            if (delImageResourceId != 0) {
+                BitmapFactory.decodeResource(getResources(), delImageResourceId);
+            }
             Bitmap dstbmp = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), null, true);
-            float px = point.getX() - bitmap.getWidth();
-            float py = point.getY();
-            canvas.drawBitmap(dstbmp, px, py, mPaintPoint);
+            float px = point.getX() - bitmap.getWidth() / 2;
+            float py = point.getY() - bitmap.getHeight() / 2;
+            delArea = bitmap.getWidth() / 2;
+            canvas.drawBitmap(dstbmp, px, py, null);
         }
     }
 
@@ -289,8 +308,8 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
      */
     private void drawCurrentPoint(Canvas canvas) {
         if (currentQ != null) {
-            canvas.drawLine(0, currentQ.getY(), widthPixels, currentQ.getY(), mCurrentPointPaint);
-            canvas.drawLine(currentQ.getX(), 0, currentQ.getX(), heightPixels, mCurrentPointPaint);
+            canvas.drawLine(currentQ.getX() - 30, currentQ.getY(), currentQ.getX() + 30, currentQ.getY(), mCurrentPointPaint);
+            canvas.drawLine(currentQ.getX(), currentQ.getY() - 30, currentQ.getX(), currentQ.getY() + 30, mCurrentPointPaint);
         }
     }
 
@@ -316,7 +335,7 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
 
     // 拖拽到新的点
     private void dragToNewPoint(float x, float y) {
-        if (currentArea == null || currentArea.getAraa() == null) {
+        if (currentArea == null || currentArea.getAraa() == null || currentArea.getAraa().size() < 3) {
             return;
         }
         double lDis = 0;
@@ -341,70 +360,69 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
                 }
             }
 
-
-            if (mCurrentPoint != null) {
-                if (mCurrentPoint.getPosition() == 0) {
-                    double dis1 = DottedLineUtil.distzj(x, currentArea.getAraa().get(1).getX(), y, y);
-                    double dis2 = DottedLineUtil.distzj(x, x, y, currentArea.getAraa().get(3).getY());
-                    if (dis1 < 100 || dis2 < 100) {
-                        if (Mlistener != null) {
-                            Mlistener.onMiniArea();
+            if (currentArea.getAraa().size() == 4) {
+                if (mCurrentPoint != null) {
+                    if (mCurrentPoint.getPosition() == 0) {
+                        double dis1 = DottedLineUtil.distzj(x, currentArea.getAraa().get(1).getX(), y, y);
+                        double dis2 = DottedLineUtil.distzj(x, x, y, currentArea.getAraa().get(3).getY());
+                        if (dis1 < 100 || dis2 < 100) {
+                            if (Mlistener != null) {
+                                Mlistener.onMiniArea();
+                            }
+                            return;
                         }
-                        Log.i(TAG, "0 到达最小宽或高");
-                        return;
-                    }
-                    currentArea.getAraa().get(0).setX(x);
-                    currentArea.getAraa().get(0).setY(y);
-                    currentArea.getAraa().get(1).setY(y);
-                    currentArea.getAraa().get(3).setX(x);
-                } else if (mCurrentPoint.getPosition() == 1) {
-                    double dis1 = DottedLineUtil.distzj(x, currentArea.getAraa().get(0).getX(), y, y);
-                    double dis2 = DottedLineUtil.distzj(x, x, y, currentArea.getAraa().get(2).getY());
-                    if (dis1 < 100 || dis2 < 100) {
-                        Log.i(TAG, "1 到达最小宽或高");
-                        if (Mlistener != null) {
-                            Mlistener.onMiniArea();
+                        currentArea.getAraa().get(0).setX(x);
+                        currentArea.getAraa().get(0).setY(y);
+                        currentArea.getAraa().get(1).setY(y);
+                        currentArea.getAraa().get(3).setX(x);
+                    } else if (mCurrentPoint.getPosition() == 1) {
+                        double dis1 = DottedLineUtil.distzj(x, currentArea.getAraa().get(0).getX(), y, y);
+                        double dis2 = DottedLineUtil.distzj(x, x, y, currentArea.getAraa().get(2).getY());
+                        if (dis1 < 100 || dis2 < 100) {
+                            if (Mlistener != null) {
+                                Mlistener.onMiniArea();
+                            }
+                            return;
                         }
-                        return;
-                    }
 
-                    currentArea.getAraa().get(0).setY(y);
-                    currentArea.getAraa().get(1).setX(x);
-                    currentArea.getAraa().get(1).setY(y);
-                    currentArea.getAraa().get(2).setX(x);
-                } else if (mCurrentPoint.getPosition() == 2) {
-                    double dis1 = DottedLineUtil.distzj(x, x, currentArea.getAraa().get(1).getY(), y);
-                    double dis2 = DottedLineUtil.distzj(x, currentArea.getAraa().get(3).getX(), y, y);
-                    if (dis1 < 100 || dis2 < 100) {
-                        Log.i(TAG, "2 到达最小宽或高");
-                        if (Mlistener != null) {
-                            Mlistener.onMiniArea();
+                        currentArea.getAraa().get(0).setY(y);
+                        currentArea.getAraa().get(1).setX(x);
+                        currentArea.getAraa().get(1).setY(y);
+                        currentArea.getAraa().get(2).setX(x);
+                    } else if (mCurrentPoint.getPosition() == 2) {
+                        double dis1 = DottedLineUtil.distzj(x, x, currentArea.getAraa().get(1).getY(), y);
+                        double dis2 = DottedLineUtil.distzj(x, currentArea.getAraa().get(3).getX(), y, y);
+                        if (dis1 < 100 || dis2 < 100) {
+                            if (Mlistener != null) {
+                                Mlistener.onMiniArea();
+                            }
+                            return;
                         }
-                        return;
-                    }
 
-                    currentArea.getAraa().get(1).setX(x);
-                    currentArea.getAraa().get(2).setX(x);
-                    currentArea.getAraa().get(2).setY(y);
-                    currentArea.getAraa().get(3).setY(y);
-                } else if (mCurrentPoint.getPosition() == 3) {
-                    double dis1 = DottedLineUtil.distzj(x, x, currentArea.getAraa().get(0).getY(), y);
-                    double dis2 = DottedLineUtil.distzj(x, currentArea.getAraa().get(2).getX(), y, y);
-                    if (dis1 < 100 || dis2 < 100) {
-                        Log.i(TAG, "3 到达最小宽或高");
-                        if (Mlistener != null) {
-                            Mlistener.onMiniArea();
+                        currentArea.getAraa().get(1).setX(x);
+                        currentArea.getAraa().get(2).setX(x);
+                        currentArea.getAraa().get(2).setY(y);
+                        currentArea.getAraa().get(3).setY(y);
+                    } else if (mCurrentPoint.getPosition() == 3) {
+                        double dis1 = DottedLineUtil.distzj(x, x, currentArea.getAraa().get(0).getY(), y);
+                        double dis2 = DottedLineUtil.distzj(x, currentArea.getAraa().get(2).getX(), y, y);
+                        if (dis1 < 100 || dis2 < 100) {
+                            if (Mlistener != null) {
+                                Mlistener.onMiniArea();
+                            }
+                            return;
                         }
-                        return;
-                    }
 
-                    currentArea.getAraa().get(0).setX(x);
-                    currentArea.getAraa().get(3).setX(x);
-                    currentArea.getAraa().get(3).setY(y);
-                    currentArea.getAraa().get(2).setY(y);
+                        currentArea.getAraa().get(0).setX(x);
+                        currentArea.getAraa().get(3).setX(x);
+                        currentArea.getAraa().get(3).setY(y);
+                        currentArea.getAraa().get(2).setY(y);
+                    }
                 }
+            } else {
+                currentArea.getAraa().get(mCurrentPoint.getPosition()).setX(x);
+                currentArea.getAraa().get(mCurrentPoint.getPosition()).setY(y);
             }
-
             hadIntersect = checkIntersect();
             mDottedLine = true;
             invalidate();
@@ -472,10 +490,7 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
      * @return
      */
     private boolean isInGraphicsArea(float currentX, float currentY) {
-        if (currentArea == null || currentArea.getAraa() == null) {
-            return false;
-        }
-        if (currentArea.getAraa().size() < 3) {
+        if (currentArea == null || currentArea.getAraa() == null || currentArea.getAraa().size() < 3) {
             return false;
         }
         boolean inArea = DottedLineUtil.IsPtInPoly(new PointBean(currentX, currentY, 0), currentArea.getAraa());
@@ -490,10 +505,7 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
      * @return
      */
     private boolean pointIsOnline(float currentX, float currentY) {
-        if (currentArea == null || currentArea.getAraa() == null) {
-            return false;
-        }
-        if (currentArea.getAraa().size() < 3) {
+        if (currentArea == null || currentArea.getAraa() == null || currentArea.getAraa().size() < 3) {
             return false;
         }
         orientation = ORIENTATION.NULL;
@@ -507,7 +519,6 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
                 p2 = currentArea.getAraa().get(i + 1);
                 isOnLine = DottedLineUtil.pointOnline(new PointBean(currentX, currentY, 0), p1, p2, 40);
             } else {
-                Log.i(TAG, "i == currentArea.size() - 2 : " + i);
                 p1 = currentArea.getAraa().get(currentArea.getAraa().size() - 1);
                 p2 = currentArea.getAraa().get(0);
                 isOnLine = DottedLineUtil.pointOnline(new PointBean(currentX, currentY, 0), p1, p2, 40);
@@ -521,6 +532,8 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
                     orientation = ORIENTATION.VERTICAL;
                 }
                 return true;
+            } else {
+
             }
         }
         return false;
@@ -534,10 +547,7 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
      * @return
      */
     private boolean isInPointArea(float currentX, float currentY) {
-        if (currentArea == null || currentArea.getAraa() == null) {
-            return false;
-        }
-        if (currentArea.getAraa().size() == 0) {
+        if (currentArea == null || currentArea.getAraa() == null || currentArea.getAraa().size() < 3) {
             return false;
         }
         PointBean pointBean = null;
@@ -569,12 +579,11 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
      * @return
      */
     private boolean isInClickArea(float x, float y) {
-        if (currentArea == null || currentArea.getAraa() == null) {
+        if (currentArea == null || currentArea.getAraa() == null || currentArea.getAraa().size() < 3) {
             return false;
         }
         PointBean pointBean = currentArea.getClickPoint();
-        Log.i(TAG, "x:" + pointBean.getX() + " , y:" + pointBean.getY() + "cx:" + x + " , cy:" + y);
-        if (x <= (pointBean.getX() + 20) && x >= (pointBean.getX() - 20) && y <= (pointBean.getY() + 20) && y >= (pointBean.getY() - 20)) {
+        if (x <= (pointBean.getX() + delArea) && x >= (pointBean.getX() - delArea) && y <= (pointBean.getY() + delArea) && y >= (pointBean.getY() - delArea)) {
             return true;
         } else {
             return false;
@@ -677,12 +686,12 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
                     dragLine(currentX, currentY);
                 }
             }
-            invalidate();
         } else if (event.getAction() == MotionEvent.ACTION_UP) {
             mAction = TOUCH_ACTION.NULL;
             orientation = ORIENTATION.NULL;
             currentP1 = null;
             currentP2 = null;
+            currentQ = null;
             mCurrentPoint = null;
             if (inClickArea) {
                 if (Mlistener != null) {
@@ -690,8 +699,8 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
                 }
                 inClickArea = false;
             }
-
         }
+        invalidate();
         return true;
     }
 
@@ -702,7 +711,6 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
      * @param currentY
      */
     private void dragLine(float currentX, float currentY) {
-        Log.i(TAG, "== dragLine ==");
         if (currentArea == null || currentArea.getAraa() == null) {
             return;
         }
@@ -714,7 +722,6 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
                 if (pointBean.getPosition() == p1Position || pointBean.getPosition() == p2Position) {
                     PointBean distance1 = null;
                     if (orientation == ORIENTATION.HORIZONTAL || currentP1.getX() == currentP2.getX()) {
-                        Log.i(TAG, "orientation : " + orientation);
                         if (p1Position == 0 && p2Position == 3) {
                             distance1 = currentArea.getAraa().get(1);
                         } else if (p1Position == 1 && p2Position == 2) {
@@ -735,7 +742,6 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
                     }
 
                     if (orientation == ORIENTATION.VERTICAL || currentP1.getY() == currentP2.getY()) {
-                        Log.i(TAG, "orientation : " + orientation);
                         if (p1Position == 0 && p2Position == 1) {
                             distance1 = currentArea.getAraa().get(3);
                         } else if (p1Position == 1 && p2Position == 0) {
@@ -757,7 +763,6 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
 
                         currentArea.getAraa().get(i).setY(currentY);
                     }
-                    Log.i(TAG, "== dragLine ==" + currentX + " , " + currentY);
                 }
             }
             invalidate();
@@ -771,11 +776,20 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
      * @param y
      */
     private void selectArea(float x, float y) {
-        for (GraphicsObj area : mAreas) {
+        for (int i = 0; i < mAreas.size(); i++) {
+            GraphicsObj area = mAreas.get(i);
             boolean inArea = DottedLineUtil.IsPtInPoly(new PointBean(x, y, 0), area.getAraa());
-            area.setSelect(inArea);
             if (inArea) {
-                currentArea = area;
+                mAreas.get(i).setSelect(true);
+                currentArea = mAreas.get(i);
+            }
+        }
+        // 多图形选中图形判定时，会因为先后顺序原因，导致选中状态赋值出现不唯一，所以用2个循环确保唯一性
+        for (int i = 0; i < mAreas.size(); i++) {
+            if (currentArea != null && currentArea.getId() == mAreas.get(i).getId()) {
+                mAreas.get(i).setSelect(true);
+            } else {
+                mAreas.get(i).setSelect(false);
             }
         }
     }
@@ -829,6 +843,21 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
         invalidate();
     }
 
+    /**
+     * 添加一个图形区域
+     *
+     * @param graphicsObjs
+     */
+    public void addAreaBeans(GraphicsObj graphicsObjs) {
+        if (graphicsObjs == null) {
+            return;
+        }
+        mAreas.add(graphicsObjs);
+        checkIntersect();
+        invalidate();
+    }
+
+
     public List<GraphicsObj> getGraphics() {
         return mAreas;
     }
@@ -853,8 +882,11 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
         paintingArea.add(new PointBean(right, bottom, 2));
         paintingArea.add(new PointBean(left, bottom, 3));
 
+        for (int i = 0; i < mAreas.size(); i++) {
+            mAreas.get(i).setSelect(false);
+        }
         currentArea = new GraphicsObj();
-        currentArea.setAraa(paintingArea, false);
+        currentArea.setAraa(paintingArea, true);
         mAreas.add(currentArea);
         invalidate();
         return true;
@@ -870,10 +902,19 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
         private ArrayList<PointBean> mAraa = new ArrayList<>();
         private PointBean clickPoint;
         private boolean isSelect;
+        private long id;
+
+        public GraphicsObj() {
+            id = System.currentTimeMillis();
+        }
 
         public void setAraa(ArrayList<PointBean> araa, boolean isSelect) {
             this.mAraa.clear();
+//            if (araa.size() > 4) {
+//                this.mAraa.addAll(araa.subList(0, 4));
+//            } else {
             this.mAraa.addAll(araa);
+//            }
             this.isSelect = isSelect;
         }
 
@@ -883,15 +924,24 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
 
         public PointBean getClickPoint() {
             if (mAraa.size() > 1) {
-                float px = mAraa.get(1).getX() - 20;
-                float py = mAraa.get(1).getY() + 20;
+                float px = mAraa.get(1).getX();
+                float py = mAraa.get(1).getY();
                 clickPoint = new PointBean(px, py, 0);
             }
             return clickPoint;
         }
 
         public void setSelect(boolean select) {
-            isSelect = select;
+            this.isSelect = select;
+        }
+
+        public long getId() {
+            return id;
+        }
+
+        @Override
+        public String toString() {
+            return "{\"clickPoint\":" + getClickPoint().toString() + ",\"isSelect\":" + isSelect + ",\"id\":" + id + "}";
         }
     }
 

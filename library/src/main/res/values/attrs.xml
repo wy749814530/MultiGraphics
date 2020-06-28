@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="MultiGraphicsView">
+        <attr name="multi_selectColor" format="color" />
+        <attr name="multi_generalColor" format="color" />
+        <attr name="multi_delImage" format="reference" />
+        <attr name="multi_miniSpacing" format="dimension" />
+        <attr name="multi_showPoint" format="boolean" />
+        <attr name="multi_showTable" format="boolean" />
+        <attr name="multi_max" format="integer" />
+    </declare-styleable>
+</resources>
