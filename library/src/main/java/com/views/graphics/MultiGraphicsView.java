@@ -254,6 +254,8 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
 
         if (mDottedLine) {
             mSelectLinePaint.setPathEffect(effects);
+        } else {
+            mSelectLinePaint.setPathEffect(null);
         }
 
         if (area.size() >= 3) {
