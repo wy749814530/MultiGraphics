@@ -9,4 +9,12 @@
         <attr name="multi_showTable" format="boolean" />
         <attr name="multi_max" format="integer" />
     </declare-styleable>
+
+    <declare-styleable name="GraphicsView">
+        <attr name="GV_LineColor" format="color" />
+        <attr name="GV_CrossLineColor" format="color" />
+        <attr name="GV_TableLineColor" format="color" />
+        <attr name="GV_ShowBgTable" format="boolean" />
+        <attr name="GV_MaxPointCount" format="integer" />
+    </declare-styleable>
 </resources>

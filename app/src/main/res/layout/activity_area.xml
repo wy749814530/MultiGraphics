@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:apps="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@mipmap/bg_image">
+
+    <com.views.graphics.GraphicsView
+        android:id="@+id/graphicsView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        apps:GV_CrossLineColor="#F2E2A3"
+        apps:GV_LineColor="#FF00FF"
+        apps:GV_MaxPointCount="8"
+        apps:GV_ShowBgTable="true"
+        apps:GV_TableLineColor="#015CAB" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:orientation="horizontal">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:onClick="complateAction"
+            android:text="完成" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:onClick="delAction"
+            android:text="删除点" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:onClick="cleanAction"
+            android:text="清除" />
+    </LinearLayout>
+</RelativeLayout>

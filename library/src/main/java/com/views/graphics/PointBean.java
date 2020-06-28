@@ -44,6 +44,10 @@ public class PointBean {
         this.current = current;
     }
 
+    public boolean isCurrent() {
+        return current;
+    }
+
     @Override
     public String toString() {
         return "{\"x\":" + x + ",\"y\":" + y + ",\"position\":" + position + "}";
