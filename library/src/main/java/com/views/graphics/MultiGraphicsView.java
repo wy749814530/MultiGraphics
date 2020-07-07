@@ -168,7 +168,6 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
         }
 
         for (GraphicsObj area : mAreas) {
-            Log.i(TAG, "== onDraw GraphicsObj:" + area.toString());
             if (area.isSelect) {
                 mSelectPaint.setColor(mSelectPaintColor);
                 mSelectLinePaint.setColor(mSelectPaintColor);
