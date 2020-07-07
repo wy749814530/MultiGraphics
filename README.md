@@ -25,11 +25,11 @@
 ```
 ### 方法
 
-#### 向控件中添加一个区域图形
+#### 向控件中添加一个矩形区域图形
 ```java
  graphicsView.addNewArea();
 ```
-#### 向控件中添加多个个区域图形
+#### 向控件中添加多个区域图形
 ```java
   ArrayList<PointBean> paintingArea = new ArrayList<>();
   paintingArea.add(new PointBean(100f, 100f, 0));
