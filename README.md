@@ -69,6 +69,7 @@ graphicsView.setOnDelClickListener(new MultiGraphicsView.OnDelClickListener() {
 ```
  
 # 2. GraphicsView 自定义多边形区域
+###### 点击控件中任意空白区域都可以添加一个点，控件自动按照顺序将所有点串连起来组成封闭图形
 ### 参数讲解
 ```java
     <com.views.graphics.GraphicsView
@@ -88,3 +89,34 @@ graphicsView.setOnDelClickListener(new MultiGraphicsView.OnDelClickListener() {
         gv_showTable="true"          // 是否显示图形底部表格
         gv_tableLineColor="#015CAB"  // 图形底部表格颜色
 ```
+
+### 方法
+
+#### 向控件中添加图形，按list顺序依次将所有点串连起来组成的封闭图形
+```java
+ graphicsView.setPointBeans(ArrayList<PointBean> points)
+```
+ 
+#### 删除图形中选中的点
+```java
+ graphicsView.delPoint(false);
+```
+#### 设置控件中图形边框线条是否显示虚线
+```java
+ graphicsView.setDottedLine(false);
+```
+#### 清除图形
+```java
+ graphicsView.delCurrentGraphics(false);
+```
+
+
+
+
+
+
+
+
+
+
+
