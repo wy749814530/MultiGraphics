@@ -11,10 +11,10 @@
     </declare-styleable>
 
     <declare-styleable name="GraphicsView">
-        <attr name="GV_LineColor" format="color" />
-        <attr name="GV_CrossLineColor" format="color" />
-        <attr name="GV_TableLineColor" format="color" />
-        <attr name="GV_ShowBgTable" format="boolean" />
-        <attr name="GV_MaxPointCount" format="integer" />
+        <attr name="gv_lineColor" format="color" />
+        <attr name="gv_crossLineColor" format="color" />
+        <attr name="gv_tableLineColor" format="color" />
+        <attr name="gv_showTable" format="boolean" />
+        <attr name="gv_maxPoint" format="integer" />
     </declare-styleable>
 </resources>

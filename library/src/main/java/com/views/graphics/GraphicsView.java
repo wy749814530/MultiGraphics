@@ -78,11 +78,11 @@ public class GraphicsView extends View implements View.OnTouchListener {
 
         if (attrs != null) {
             TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.GraphicsView);
-            mPaintTextColor = typedArray.getColor(R.styleable.GraphicsView_GV_LineColor, mPaintTextColor);
-            mCrosslineColor = typedArray.getColor(R.styleable.GraphicsView_GV_CrossLineColor, mCrosslineColor);
-            mPaintLineColor = typedArray.getResourceId(R.styleable.GraphicsView_GV_TableLineColor, mPaintLineColor);
-            MAX_POINT_COUNT = typedArray.getInteger(R.styleable.GraphicsView_GV_MaxPointCount, 8);
-            mShowBgTable = typedArray.getBoolean(R.styleable.GraphicsView_GV_ShowBgTable, true);
+            mPaintTextColor = typedArray.getColor(R.styleable.GraphicsView_gv_lineColor, mPaintTextColor);
+            mCrosslineColor = typedArray.getColor(R.styleable.GraphicsView_gv_crossLineColor, mCrosslineColor);
+            mPaintLineColor = typedArray.getResourceId(R.styleable.GraphicsView_gv_tableLineColor, mPaintLineColor);
+            MAX_POINT_COUNT = typedArray.getInteger(R.styleable.GraphicsView_gv_maxPoint, 8);
+            mShowBgTable = typedArray.getBoolean(R.styleable.GraphicsView_gv_showTable, true);
         }
 
         mPaintText = new Paint();

@@ -27,6 +27,7 @@ public class AreaActivity extends AppCompatActivity {
 
 
     public void complateAction(View view) {
+        graphicsView.getPointBeans();
         graphicsView.setDottedLine(false);
     }
 

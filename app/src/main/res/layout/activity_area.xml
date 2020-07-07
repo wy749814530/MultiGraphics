@@ -10,11 +10,11 @@
         android:id="@+id/graphicsView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        apps:GV_CrossLineColor="#F2E2A3"
-        apps:GV_LineColor="#FF00FF"
-        apps:GV_MaxPointCount="8"
-        apps:GV_ShowBgTable="true"
-        apps:GV_TableLineColor="#015CAB" />
+        apps:gv_crossLineColor="#F2E2A3"
+        apps:gv_lineColor="#FF00FF"
+        apps:gv_maxPoint="8"
+        apps:gv_showTable="true"
+        apps:gv_tableLineColor="#015CAB" />
 
     <LinearLayout
         android:layout_width="wrap_content"
