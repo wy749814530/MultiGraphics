@@ -23,6 +23,50 @@
     multi_showPoint="true"                // bool 是否显示当前点击位置
     multi_showTable="true"                // 是否显示底部网格
 ```
+### 方法
 
+#### 向控件中添加一个区域图形
+```java
+ graphicsView.addNewArea();
+```
+#### 向控件中添加多个个区域图形
+```java
+  ArrayList<PointBean> paintingArea = new ArrayList<>();
+  paintingArea.add(new PointBean(100f, 100f, 0));
+  paintingArea.add(new PointBean(340f, 120f, 1));
+  paintingArea.add(new PointBean(320f, 320f, 2));
+  paintingArea.add(new PointBean(370f, 380f, 3));
+  paintingArea.add(new PointBean(90f, 330f, 4));
 
+  MultiGraphicsView.GraphicsObj currentArea = new MultiGraphicsView.GraphicsObj();
+  currentArea.setAraa(paintingArea, false);
+  
+  graphicsView.addAreaBeans(currentArea);
+```
+
+#### 设置控件中图形边框线条是否显示虚线
+```java
+ graphicsView.setDottedLine(false);
+```
+
+#### 删除控件中当前选中的图形
+```java
+ graphicsView.delCurrentGraphics(false);
+```
+
+#### 设置控件图形监听事件
+```java
+graphicsView.setOnDelClickListener(new MultiGraphicsView.OnDelClickListener() {
+      @Override
+      public void onDelClicked() {
+          Toast.makeText(MutilAreaActivity.this, "点击了删除按钮，删除图形", Toast.LENGTH_LONG).show();
+          graphicsView.delCurrentGraphics();
+      }
+
+      @Override
+      public void onMiniArea() {
+          Toast.makeText(MutilAreaActivity.this, "到达最小区域", Toast.LENGTH_LONG).show();
+      }
+  });
+```
  
