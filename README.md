@@ -52,6 +52,12 @@
  graphicsView.delCurrentGraphics(false);
 ```
 
+
+#### 获取控件中所有图形区域
+```java
+ List<GraphicsObj> graphicsList = graphicsView.getGraphics();
+```
+
 #### 设置控件图形监听事件
 ```java
 graphicsView.setOnDelClickListener(new MultiGraphicsView.OnDelClickListener() {
@@ -109,7 +115,10 @@ graphicsView.setOnDelClickListener(new MultiGraphicsView.OnDelClickListener() {
 ```java
  graphicsView.delCurrentGraphics(false);
 ```
-
+#### 获取控件中图形
+```java
+ List<PointBean> points = graphicsView.getPointBeans();
+```
 
 
 
