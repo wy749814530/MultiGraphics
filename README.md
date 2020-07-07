@@ -1,7 +1,5 @@
-# MultiGraphics
+# 1.  MultiGraphics 自定义多区域可拖拽图形
  
-##自定义多区域可拖拽图形
-
 ### 参数讲解
 ```java
     <com.views.graphics.MultiGraphicsView
@@ -70,3 +68,23 @@ graphicsView.setOnDelClickListener(new MultiGraphicsView.OnDelClickListener() {
   });
 ```
  
+# 2. GraphicsView 自定义多边形区域
+### 参数讲解
+```java
+    <com.views.graphics.GraphicsView
+        android:id="@+id/graphicsView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        apps:gv_crossLineColor="#F2E2A3"
+        apps:gv_lineColor="#FF00FF"
+        apps:gv_maxPoint="8"
+        apps:gv_showTable="true"
+        apps:gv_tableLineColor="#015CAB" />
+        
+        
+        gv_crossLineColor="#F2E2A3"  // 图形存在交叉线时，图形的颜色
+        gv_lineColor="#FF00FF"       // 图形颜色
+        gv_maxPoint="8"              // 图形最多由多少个点构成
+        gv_showTable="true"          // 是否显示图形底部表格
+        gv_tableLineColor="#015CAB"  // 图形底部表格颜色
+```
