@@ -10,8 +10,8 @@
         android:id="@+id/graphicsView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        apps:multi_delImage="@mipmap/ic_launcher"
-        apps:multi_generalColor="@color/colorAccent"
+
+        apps:multi_generalColor="@color/blue_color"
         apps:multi_max="6"
         apps:multi_selectColor="@color/blue_color"
         apps:multi_showPoint="true"

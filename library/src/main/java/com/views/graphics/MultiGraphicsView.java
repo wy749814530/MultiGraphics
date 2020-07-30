@@ -11,7 +11,12 @@ import android.graphics.Paint;
 import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.Path;
 import android.graphics.PathEffect;
+import android.graphics.drawable.AdaptiveIconDrawable;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -23,6 +28,7 @@ import java.util.List;
 
 /**
  * Created by Administrator on 2020/3/10 0010.
+ * https://github.com/wy749814530/MultiGraphics
  */
 
 public class MultiGraphicsView extends View implements View.OnTouchListener {
@@ -64,6 +70,7 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
     private int PRECISION = 100;              // 点容错区间
     private int MAX_AREA_COUNT = 4;          // 最多显示多少个点
     private boolean mDottedLine = false;    // 是否显示虚线
+    private boolean enabledDottedLine = true;    // 是否显示虚线
     private boolean hadIntersect = false;   // 是否有交叉线
     private int delImageResourceId = 0;
     private boolean mShowPoint;
@@ -106,6 +113,7 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
             mGeneralPaintColor = typedArray.getColor(R.styleable.MultiGraphicsView_multi_generalColor, mGeneralPaintColor);
             delImageResourceId = typedArray.getResourceId(R.styleable.MultiGraphicsView_multi_delImage, delImageResourceId);
             PRECISION = typedArray.getDimensionPixelSize(R.styleable.MultiGraphicsView_multi_miniSpacing, PRECISION);
+            enabledDottedLine = typedArray.getBoolean(R.styleable.MultiGraphicsView_multi_dottedLine, true);
             mShowPoint = typedArray.getBoolean(R.styleable.MultiGraphicsView_multi_showPoint, false);
             mShowTable = typedArray.getBoolean(R.styleable.MultiGraphicsView_multi_showTable, false);
             MAX_AREA_COUNT = typedArray.getInteger(R.styleable.MultiGraphicsView_multi_max, 4);
@@ -251,7 +259,7 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
             path.lineTo(area.get(i).getX(), area.get(i).getY());//右下角
         }
 
-        if (mDottedLine) {
+        if (mDottedLine && enabledDottedLine) {
             mSelectLinePaint.setPathEffect(effects);
         } else {
             mSelectLinePaint.setPathEffect(null);
@@ -292,14 +300,35 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
             PointBean point = area.get(minPostion);
             Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.del_icon);
             if (delImageResourceId != 0) {
-                BitmapFactory.decodeResource(getResources(), delImageResourceId);
+                bitmap = getIconBitmap(delImageResourceId);
             }
-            Bitmap dstbmp = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), null, true);
-            float px = point.getX() - bitmap.getWidth() / 2;
-            float py = point.getY() - bitmap.getHeight() / 2;
-            delArea = bitmap.getWidth() / 2;
-            canvas.drawBitmap(dstbmp, px, py, null);
+            if (bitmap != null) {
+                float px = point.getX() - bitmap.getWidth() / 2;
+                float py = point.getY() - bitmap.getHeight() / 2;
+                delArea = bitmap.getWidth() / 2;
+                canvas.drawBitmap(bitmap, px, py, null);
+            }
         }
+    }
+
+    public Bitmap getIconBitmap(int iconId) {
+        try {
+            Drawable icon = ContextCompat.getDrawable(getContext(), iconId);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && icon instanceof AdaptiveIconDrawable) {
+                Bitmap bitmap = Bitmap.createBitmap(icon.getIntrinsicWidth(), icon.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+                Canvas canvas = new Canvas(bitmap);
+                icon.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+                icon.draw(canvas);
+                return bitmap;
+            } else {
+                if (icon instanceof BitmapDrawable) {
+                    return ((BitmapDrawable) icon).getBitmap();
+                }
+            }
+        } catch (Exception e) {
+
+        }
+        return null;
     }
 
     /**
@@ -425,7 +454,9 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
                 currentArea.getAraa().get(mCurrentPoint.getPosition()).setY(y);
             }
             hadIntersect = checkIntersect();
-            mDottedLine = true;
+            if (enabledDottedLine) {
+                mDottedLine = true;
+            }
             invalidate();
         }
     }
@@ -463,8 +494,9 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
             currentArea.getAraa().get(i).setX(point.getX() + moveX);
             currentArea.getAraa().get(i).setY(point.getY() + moveY);
         }
-
-        mDottedLine = true;
+        if (enabledDottedLine) {
+            mDottedLine = true;
+        }
         invalidate();
     }
 
@@ -808,8 +840,10 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
      * @param dottedLine
      */
     public void setDottedLine(boolean dottedLine) {
-        mDottedLine = dottedLine;
-        invalidate();
+        if (enabledDottedLine) {
+            mDottedLine = dottedLine;
+            invalidate();
+        }
     }
 
     public void delCurrentGraphics() {
@@ -855,7 +889,9 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
             return;
         }
         mAreas.add(graphicsObjs);
-        mDottedLine = true;
+        if (enabledDottedLine) {
+            mDottedLine = true;
+        }
         checkIntersect();
         invalidate();
     }
@@ -891,7 +927,9 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
         currentArea = new GraphicsObj();
         currentArea.setAraa(paintingArea, true);
         mAreas.add(currentArea);
-        mDottedLine = true;
+        if (enabledDottedLine) {
+            mDottedLine = true;
+        }
         invalidate();
         return true;
     }
