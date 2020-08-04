@@ -810,17 +810,22 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
      * @param y
      */
     private void selectArea(float x, float y) {
+        Log.i(TAG, " ============== selectArea ============== ");
         for (int i = 0; i < mAreas.size(); i++) {
             GraphicsObj area = mAreas.get(i);
             boolean inArea = DottedLineUtil.IsPtInPoly(new PointBean(x, y, 0), area.getAraa());
+            Log.i(TAG, " selectArea : " + i + " , isSelect : " + inArea);
             if (inArea) {
                 mAreas.get(i).setSelect(true);
                 currentArea = mAreas.get(i);
+            } else {
+                mAreas.get(i).setSelect(false);
             }
         }
         // 多图形选中图形判定时，会因为先后顺序原因，导致选中状态赋值出现不唯一，所以用2个循环确保唯一性
         for (int i = 0; i < mAreas.size(); i++) {
             if (currentArea != null && currentArea.getId() == mAreas.get(i).getId()) {
+                Log.i(TAG, "KKKK selectArea : " + i + " , isSelect : " + true);
                 mAreas.get(i).setSelect(true);
             } else {
                 mAreas.get(i).setSelect(false);
@@ -873,8 +878,11 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
         mAreas.clear();
         if (graphicsObjs != null && graphicsObjs.size() != 0) {
             mAreas.addAll(graphicsObjs);
-            currentArea = mAreas.get(0);
+            for (int i = 0; i < mAreas.size(); i++) {
+                mAreas.get(i).setSelect(false);
+            }
         }
+        currentArea = null;
         checkIntersect();
         invalidate();
     }
@@ -924,7 +932,8 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
         for (int i = 0; i < mAreas.size(); i++) {
             mAreas.get(i).setSelect(false);
         }
-        currentArea = new GraphicsObj();
+
+        currentArea = new GraphicsObj(mAreas.size());
         currentArea.setAraa(paintingArea, true);
         mAreas.add(currentArea);
         if (enabledDottedLine) {
@@ -944,10 +953,10 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
         private ArrayList<PointBean> mAraa = new ArrayList<>();
         private PointBean clickPoint;
         private boolean isSelect;
-        private long id;
+        private int id;
 
-        public GraphicsObj() {
-            id = System.currentTimeMillis();
+        public GraphicsObj(int id) {
+            this.id = id;
         }
 
         public void setAraa(ArrayList<PointBean> araa, boolean isSelect) {
@@ -990,7 +999,7 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
             this.isSelect = select;
         }
 
-        public long getId() {
+        public int getId() {
             return id;
         }
 

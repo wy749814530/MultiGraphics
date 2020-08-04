@@ -2,6 +2,7 @@ package com.views.multigraphics;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -35,16 +36,57 @@ public class MutilAreaActivity extends AppCompatActivity {
             }
         });
 
+        initData();
+    }
+
+    private float screenWidth, screenHeight;
+    private float xRatio = 1, yRatio = 1;
+    private float height = 1080, width = 1920;
+
+    private void resetAreaSize() {
+        DisplayMetrics dm = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(dm);
+        screenHeight = dm.heightPixels;
+        screenWidth = dm.widthPixels;
+
+        xRatio = screenWidth / width;
+        yRatio = screenHeight / height;
+    }
+
+    private void initData() {
+        resetAreaSize();
+        String dataString = "{\"Region\":[[{\"x\":258,\"y\":159},{\"x\":898,\"y\":159},{\"x\":898,\"y\":519},{\"x\":258,\"y\":519}],[{\"x\":1019,\"y\":157},{\"x\":1659,\"y\":157},{\"x\":1659,\"y\":517},{\"x\":1019,\"y\":517}],[{\"x\":212,\"y\":668},{\"x\":852,\"y\":668},{\"x\":852,\"y\":1028},{\"x\":212,\"y\":1028}],[{\"x\":998,\"y\":603},{\"x\":1638,\"y\":603},{\"x\":1638,\"y\":963},{\"x\":998,\"y\":963}]],\"Enable\":true,\"RegionType\":1}";
+        PointListBean pointListBean = new Gson().fromJson(dataString, PointListBean.class);
+        if (pointListBean != null) {
+            List<MultiGraphicsView.GraphicsObj> graphicsObjs = new ArrayList<>();
+
+            for (List<PointListBean.RegionBean> pointBeans : pointListBean.getRegion()) {
+                MultiGraphicsView.GraphicsObj graphicsObj = new MultiGraphicsView.GraphicsObj(graphicsObjs.size());
+                ArrayList<PointBean> mPointBeans = new ArrayList<>();
+                for (int i = 0; i < pointBeans.size(); i++) {
+                    PointListBean.RegionBean pointBean = pointBeans.get(i);
+                    PointBean point = new PointBean(pointBean.getX() * xRatio, pointBean.getY() * yRatio, i);
+                    mPointBeans.add(point);
+                }
+                // 这里 第二个参数必须为false
+                graphicsObj.setAraa(mPointBeans, false);
+                graphicsObjs.add(graphicsObj);
+            }
+
+
+            graphicsView.setAreaBeans(graphicsObjs);
+            graphicsView.setDottedLine(false);
+        }
     }
 
     public void addAction(View view) {
-        List<MultiGraphicsView.GraphicsObj> objs = graphicsView.getGraphics();
-        if (objs.size() == 0) {
-            addSuijiPoint();
-        } else {
-            graphicsView.addNewArea();
-        }
-
+//        List<MultiGraphicsView.GraphicsObj> objs = graphicsView.getGraphics();
+//        if (objs.size() == 0) {
+//            addSuijiPoint();
+//        } else {
+//            graphicsView.addNewArea();
+//        }
+        graphicsView.addNewArea();
     }
 
     public void complateAction(View view) {
@@ -60,7 +102,7 @@ public class MutilAreaActivity extends AppCompatActivity {
         paintingArea.add(new PointBean(370f, 380f, 3));
         paintingArea.add(new PointBean(90f, 330f, 4));
 
-        MultiGraphicsView.GraphicsObj currentArea = new MultiGraphicsView.GraphicsObj();
+        MultiGraphicsView.GraphicsObj currentArea = new MultiGraphicsView.GraphicsObj(graphicsView.getGraphics().size());
         currentArea.setAraa(paintingArea, false);
 
         Log.i("MainActivity", "addSuijiPoint : " + new Gson().toJson(currentArea));
