@@ -10,7 +10,7 @@
         android:id="@+id/graphicsView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-
+        apps:multi_useComplete="true"
         apps:multi_generalColor="@color/blue_color"
         apps:multi_max="6"
         apps:multi_selectColor="@color/blue_color"

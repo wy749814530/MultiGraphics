@@ -75,7 +75,6 @@ public class MutilAreaActivity extends AppCompatActivity {
 
 
             graphicsView.setAreaBeans(graphicsObjs);
-            graphicsView.setDottedLine(false);
         }
     }
 
@@ -91,7 +90,7 @@ public class MutilAreaActivity extends AppCompatActivity {
 
     public void complateAction(View view) {
         graphicsView.getGraphics();
-        graphicsView.setDottedLine(false);
+        graphicsView.complete();
     }
 
     public void addSuijiPoint() {

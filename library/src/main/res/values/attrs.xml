@@ -8,7 +8,9 @@
         <attr name="multi_showPoint" format="boolean" />
         <attr name="multi_showTable" format="boolean" />
         <attr name="multi_dottedLine" format="boolean" />
+        <attr name="multi_useComplete" format="boolean" />
         <attr name="multi_max" format="integer" />
+
     </declare-styleable>
 
     <declare-styleable name="GraphicsView">

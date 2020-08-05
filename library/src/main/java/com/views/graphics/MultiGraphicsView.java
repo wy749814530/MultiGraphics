@@ -72,6 +72,7 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
     private boolean mDottedLine = false;    // 是否显示虚线
     private boolean enabledDottedLine = true;    // 是否显示虚线
     private boolean hadIntersect = false;   // 是否有交叉线
+    private boolean useComplete = true;
     private int delImageResourceId = 0;
     private boolean mShowPoint;
     private boolean mShowTable;
@@ -114,6 +115,7 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
             delImageResourceId = typedArray.getResourceId(R.styleable.MultiGraphicsView_multi_delImage, delImageResourceId);
             PRECISION = typedArray.getDimensionPixelSize(R.styleable.MultiGraphicsView_multi_miniSpacing, PRECISION);
             enabledDottedLine = typedArray.getBoolean(R.styleable.MultiGraphicsView_multi_dottedLine, true);
+            useComplete = typedArray.getBoolean(R.styleable.MultiGraphicsView_multi_useComplete, true);
             mShowPoint = typedArray.getBoolean(R.styleable.MultiGraphicsView_multi_showPoint, false);
             mShowTable = typedArray.getBoolean(R.styleable.MultiGraphicsView_multi_showTable, false);
             MAX_AREA_COUNT = typedArray.getInteger(R.styleable.MultiGraphicsView_multi_max, 4);
@@ -184,8 +186,24 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
                 mSelectLinePaint.setColor(mGeneralPaintColor);
             }
             drawCloseGraphics(canvas, area.getAraa());// 画封闭图形填充区域
-            drawCloseLines(canvas, area.getAraa());// 画封闭图形外线
-            drawDelPoint(canvas, area.getAraa());// 画对应点的数字框
+
+            if (area.isSelect) {
+                mDottedLine = true;
+                drawCloseLines(canvas, area.getAraa());// 画封闭图形外线
+                drawDelPoint(canvas, area.getAraa());// 画对应点的数字框
+            } else {
+                if (useComplete) {
+                    if (area.isComplete) {
+                        mDottedLine = false;
+                    } else {
+                        mDottedLine = true;
+                    }
+                } else {
+                    mDottedLine = false;
+                }
+
+                drawCloseLines(canvas, area.getAraa());// 画封闭图形外线
+            }
         }
         // 画当前点位置
         if (mShowPoint) {
@@ -454,9 +472,6 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
                 currentArea.getAraa().get(mCurrentPoint.getPosition()).setY(y);
             }
             hadIntersect = checkIntersect();
-            if (enabledDottedLine) {
-                mDottedLine = true;
-            }
             invalidate();
         }
     }
@@ -493,9 +508,6 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
             PointBean point = currentArea.getAraa().get(i);
             currentArea.getAraa().get(i).setX(point.getX() + moveX);
             currentArea.getAraa().get(i).setY(point.getY() + moveY);
-        }
-        if (enabledDottedLine) {
-            mDottedLine = true;
         }
         invalidate();
     }
@@ -827,6 +839,7 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
             if (currentArea != null && currentArea.getId() == mAreas.get(i).getId()) {
                 Log.i(TAG, "KKKK selectArea : " + i + " , isSelect : " + true);
                 mAreas.get(i).setSelect(true);
+                mAreas.get(i).setComplete(false);
             } else {
                 mAreas.get(i).setSelect(false);
             }
@@ -845,11 +858,19 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
      * @param dottedLine
      */
     public void setDottedLine(boolean dottedLine) {
-        if (enabledDottedLine) {
-            mDottedLine = dottedLine;
-            invalidate();
-        }
+        mDottedLine = dottedLine;
+        invalidate();
     }
+
+    public void complete() {
+        mDottedLine = false;
+        for (int i = 0; i < mAreas.size(); i++) {
+            mAreas.get(i).setSelect(false);
+            mAreas.get(i).setComplete(true);
+        }
+        invalidate();
+    }
+
 
     public void delCurrentGraphics() {
         for (GraphicsObj obj : mAreas) {
@@ -880,6 +901,7 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
             mAreas.addAll(graphicsObjs);
             for (int i = 0; i < mAreas.size(); i++) {
                 mAreas.get(i).setSelect(false);
+                mAreas.get(i).setComplete(true);
             }
         }
         currentArea = null;
@@ -897,9 +919,6 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
             return;
         }
         mAreas.add(graphicsObjs);
-        if (enabledDottedLine) {
-            mDottedLine = true;
-        }
         checkIntersect();
         invalidate();
     }
@@ -934,11 +953,9 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
         }
 
         currentArea = new GraphicsObj(mAreas.size());
+        currentArea.setComplete(false);
         currentArea.setAraa(paintingArea, true);
         mAreas.add(currentArea);
-        if (enabledDottedLine) {
-            mDottedLine = true;
-        }
         invalidate();
         return true;
     }
@@ -953,6 +970,7 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
         private ArrayList<PointBean> mAraa = new ArrayList<>();
         private PointBean clickPoint;
         private boolean isSelect;
+        private boolean isComplete = true;
         private int id;
 
         public GraphicsObj(int id) {
@@ -967,6 +985,14 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
             this.mAraa.addAll(araa);
 //            }
             this.isSelect = isSelect;
+        }
+
+        public void setComplete(boolean complete) {
+            this.isComplete = complete;
+        }
+
+        public boolean isComplete() {
+            return isComplete;
         }
 
         public ArrayList<PointBean> getAraa() {
