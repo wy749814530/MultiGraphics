@@ -1,6 +1,7 @@
 package com.views.multigraphics;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -76,6 +77,13 @@ public class MutilAreaActivity extends AppCompatActivity {
 
             graphicsView.setAreaBeans(graphicsObjs);
         }
+        graphicsView.setEnabled(false);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                graphicsView.setEnabled(true);
+            }
+        }, 3 * 1000);
     }
 
     public void addAction(View view) {

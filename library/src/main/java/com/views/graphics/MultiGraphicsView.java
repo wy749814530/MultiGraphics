@@ -689,6 +689,9 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
+        if (!mEnabled) {
+            return false;
+        }
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
             //TODO 轮训所有图形，自行判断当前手势是针对哪个图形的操作
             selectArea(event.getX(), event.getY());
