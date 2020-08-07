@@ -42,6 +42,7 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
         NULL,
     }
 
+
     private ORIENTATION orientation = ORIENTATION.NULL;
 
     public enum ORIENTATION {
@@ -63,7 +64,7 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
     Paint mCurrentPointPaint; //
     int mCurrentPointColor = 0xffB0E11E;
 
-
+    private boolean openMinAarea = false; // 是否允许开启最小区域
     private int spacing = 30;
     private int widthPixels;
     private int heightPixels;
@@ -118,6 +119,7 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
             useComplete = typedArray.getBoolean(R.styleable.MultiGraphicsView_multi_useComplete, true);
             mShowPoint = typedArray.getBoolean(R.styleable.MultiGraphicsView_multi_showPoint, false);
             mShowTable = typedArray.getBoolean(R.styleable.MultiGraphicsView_multi_showTable, false);
+            openMinAarea = typedArray.getBoolean(R.styleable.MultiGraphicsView_multi_openMinAarea, false);
             MAX_AREA_COUNT = typedArray.getInteger(R.styleable.MultiGraphicsView_multi_max, 4);
         }
 
@@ -413,9 +415,13 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
                     if (mCurrentPoint.getPosition() == 0) {
                         double dis1 = DottedLineUtil.distzj(x, currentArea.getAraa().get(1).getX(), y, y);
                         double dis2 = DottedLineUtil.distzj(x, x, y, currentArea.getAraa().get(3).getY());
-                        if (dis1 < 100 || dis2 < 100) {
+                        if (openMinAarea && (dis1 < 100 || dis2 < 100)) {
                             if (Mlistener != null) {
-                                Mlistener.onMiniArea();
+                                if (dis1 < 100) {
+                                    Mlistener.onMiniArea(ORIENTATION.HORIZONTAL);
+                                } else {
+                                    Mlistener.onMiniArea(ORIENTATION.VERTICAL);
+                                }
                             }
                             return;
                         }
@@ -426,9 +432,13 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
                     } else if (mCurrentPoint.getPosition() == 1) {
                         double dis1 = DottedLineUtil.distzj(x, currentArea.getAraa().get(0).getX(), y, y);
                         double dis2 = DottedLineUtil.distzj(x, x, y, currentArea.getAraa().get(2).getY());
-                        if (dis1 < 100 || dis2 < 100) {
+                        if (openMinAarea && (dis1 < 100 || dis2 < 100)) {
                             if (Mlistener != null) {
-                                Mlistener.onMiniArea();
+                                if (dis1 < 100) {
+                                    Mlistener.onMiniArea(ORIENTATION.HORIZONTAL);
+                                } else {
+                                    Mlistener.onMiniArea(ORIENTATION.VERTICAL);
+                                }
                             }
                             return;
                         }
@@ -440,9 +450,13 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
                     } else if (mCurrentPoint.getPosition() == 2) {
                         double dis1 = DottedLineUtil.distzj(x, x, currentArea.getAraa().get(1).getY(), y);
                         double dis2 = DottedLineUtil.distzj(x, currentArea.getAraa().get(3).getX(), y, y);
-                        if (dis1 < 100 || dis2 < 100) {
+                        if (openMinAarea && (dis1 < 100 || dis2 < 100)) {
                             if (Mlistener != null) {
-                                Mlistener.onMiniArea();
+                                if (dis1 < 100) {
+                                    Mlistener.onMiniArea(ORIENTATION.HORIZONTAL);
+                                } else {
+                                    Mlistener.onMiniArea(ORIENTATION.VERTICAL);
+                                }
                             }
                             return;
                         }
@@ -454,9 +468,13 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
                     } else if (mCurrentPoint.getPosition() == 3) {
                         double dis1 = DottedLineUtil.distzj(x, x, currentArea.getAraa().get(0).getY(), y);
                         double dis2 = DottedLineUtil.distzj(x, currentArea.getAraa().get(2).getX(), y, y);
-                        if (dis1 < 100 || dis2 < 100) {
+                        if (openMinAarea && (dis1 < 100 || dis2 < 100)) {
                             if (Mlistener != null) {
-                                Mlistener.onMiniArea();
+                                if (dis1 < 100) {
+                                    Mlistener.onMiniArea(ORIENTATION.HORIZONTAL);
+                                } else {
+                                    Mlistener.onMiniArea(ORIENTATION.VERTICAL);
+                                }
                             }
                             return;
                         }
@@ -783,7 +801,7 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
                         if (distance1 != null) {
                             double dis1 = DottedLineUtil.distzj(currentX, distance1.getX(), currentP1.getY(), distance1.getY());
                             if (dis1 < 100 && Mlistener != null) {
-                                Mlistener.onMiniArea();
+                                Mlistener.onMiniArea(ORIENTATION.HORIZONTAL);
                                 return;
                             }
                         }
@@ -805,7 +823,7 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
                         if (distance1 != null) {
                             double dis1 = DottedLineUtil.distzj(currentP1.getX(), distance1.getX(), currentY, distance1.getY());
                             if (dis1 < 100 && Mlistener != null) {
-                                Mlistener.onMiniArea();
+                                Mlistener.onMiniArea(ORIENTATION.VERTICAL);
                                 return;
                             }
                         }
@@ -966,7 +984,7 @@ public class MultiGraphicsView extends View implements View.OnTouchListener {
     public interface OnDelClickListener {
         void onDelClicked();
 
-        void onMiniArea();
+        void onMiniArea(ORIENTATION orientation);
     }
 
     public static class GraphicsObj {

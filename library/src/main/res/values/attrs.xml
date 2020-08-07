@@ -10,7 +10,7 @@
         <attr name="multi_dottedLine" format="boolean" />
         <attr name="multi_useComplete" format="boolean" />
         <attr name="multi_max" format="integer" />
-
+        <attr name="multi_openMinAarea" format="boolean" />
     </declare-styleable>
 
     <declare-styleable name="GraphicsView">

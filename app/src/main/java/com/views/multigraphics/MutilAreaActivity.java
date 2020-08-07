@@ -17,6 +17,7 @@ import java.util.List;
 
 public class MutilAreaActivity extends AppCompatActivity {
     MultiGraphicsView graphicsView;
+    private String TAG = "MutilAreaActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,8 +33,15 @@ public class MutilAreaActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onMiniArea() {
-                Toast.makeText(MutilAreaActivity.this, "到达最小区域", Toast.LENGTH_LONG).show();
+            public void onMiniArea(MultiGraphicsView.ORIENTATION orientation) {
+                if (orientation == MultiGraphicsView.ORIENTATION.HORIZONTAL) {
+                    Log.i(TAG, "到达最小区域 HORIZONTAL");
+                    Toast.makeText(MutilAreaActivity.this, "到达最小区域 HORIZONTAL ", Toast.LENGTH_LONG).show();
+                } else {
+                    Log.i(TAG, "到达最小区域 VERTICAL");
+                    Toast.makeText(MutilAreaActivity.this, "到达最小区域 VERTICAL ", Toast.LENGTH_LONG).show();
+                }
+
             }
         });
 
