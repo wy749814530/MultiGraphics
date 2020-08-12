@@ -13,6 +13,7 @@
         apps:multi_useComplete="true"
         apps:multi_generalColor="@color/blue_color"
         apps:multi_max="6"
+        apps:multi_openMinAarea="true"
         apps:multi_selectColor="@color/blue_color"
         apps:multi_showPoint="true"
         apps:multi_showTable="true" />
